@@ -3,29 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Football Signup Sheet - 9 Players Per Team</title>
-
-  <!-- Firebase libraries -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-  <!-- Firebase configuration -->
-	<script>
-		const firebaseConfig = {
-			apiKey: "AIzaSyBpPThL_BDhZ_XK7p4QMkOqnSYaYP25ke8",
-			authDomain: "revive-sports-c62da.firebaseapp.com",
-			projectId: "revive-sports-c62da",
-			storageBucket: "revive-sports-c62da.firebasestorage.app",
-			messagingSenderId: "1016756202902",
-			appId: "1:1016756202902:web:7175987119c9726c9fc1b7",
-			measurementId: "G-BYC2DTPR17"
-		};
-		
-		firebase.initializeApp(firebaseConfig);
-		const db = firebase.database();
-		const playersRef = db.ref("football_players");
-		const matchesRef = db.ref("football_matches");
-  </script>
+  <title>Football Signup Sheet - 7-a-side</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -184,28 +162,10 @@
       font-style: italic;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script>
-	const firebaseConfig = {
-	  apiKey: "AIzaSyBpPThL_BDhZ_XK7p4QMkOqnSYaYP25ke8Y",
-	  authDomain: "revive-sports-c62da.firebaseapp.com",
-	  databaseURL: "https://revive-sports-c62da-default-rtdb.firebaseio.com",
-	  projectId: "revive-sports-c62da",
-	  storageBucket: "revive-sports-c62da.appspot.com",
-	  messagingSenderId: "1016756202902",
-	  appId: "G-BYC2DTPR17"
-	};
-
-	firebase.initializeApp(firebaseConfig);
-	const db = firebase.database();
-	const playersRef = db.ref("football_players");
-	const matchesRef = db.ref("football_matches");
-  </script>
 </head>
 <body>
   <h2>Football signup sheet</h2>
-  <p class="subtitle">7 Players Per Team</p>
+  <p class="subtitle">7-a-side teams</p>
 
   <div class="card">
     <div class="input-row">
@@ -433,13 +393,11 @@
     }
 
     function saveToLocalStorage() {
-       <!--localStorage.setItem('netball_players', JSON.stringify(players));-->
-       <!--localStorage.setItem('netball_matches', JSON.stringify(matchResults));-->
-	   playersRef.set(players);
-	   matchesRef.set(matchResults)
+      localStorage.setItem('football_players', JSON.stringify(players));
+      localStorage.setItem('football_matches', JSON.stringify(matchResults));
     }
 
-<!--     function loadFromLocalStorage() {
+    function loadFromLocalStorage() {
       const savedPlayers = localStorage.getItem('football_players');
       const savedMatches = localStorage.getItem('football_matches');
       if (savedPlayers) {
@@ -450,33 +408,13 @@
         matchResults = JSON.parse(savedMatches);
       }
       render();
-    } -->
-	function initRealtimeSync() {
-
-	  playersRef.on("value", snapshot => {
-		const data = snapshot.val();
-		if (data) {
-		  players = data;
-		  allocateTeams();
-		  render();
-		}
-	  });
-
-	  matchesRef.on("value", snapshot => {
-		const data = snapshot.val();
-		if (data) {
-		  matchResults = data;
-		  restoreMatchResults();
-		}
-	  });
-
-	}
+    }
 
     document.getElementById('playerName').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') addPlayer();
     });
 
-    initRealtimeSync();
+    loadFromLocalStorage();
   </script>
 </body>
 </html>
