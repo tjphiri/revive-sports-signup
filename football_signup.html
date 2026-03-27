@@ -3,7 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Football Signup Sheet - & Players Per Team</title>
+  <title>Football Signup Sheet - 9 Players Per Team</title>
+
+  <!-- Firebase libraries -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <!-- Firebase configuration -->
+	<script>
+		const firebaseConfig = {
+			apiKey: "AIzaSyBpPThL_BDhZ_XK7p4QMkOqnSYaYP25ke8",
+			authDomain: "revive-sports-c62da.firebaseapp.com",
+			projectId: "revive-sports-c62da",
+			storageBucket: "revive-sports-c62da.firebasestorage.app",
+			messagingSenderId: "1016756202902",
+			appId: "1:1016756202902:web:7175987119c9726c9fc1b7",
+			measurementId: "G-BYC2DTPR17"
+		};
+		
+		firebase.initializeApp(firebaseConfig);
+		const db = firebase.database();
+		const playersRef = db.ref("football_players");
+		const matchesRef = db.ref("football_matches");
+  </script>
   <style>
     * { box-sizing: border-box; }
     body {
