@@ -1,0 +1,40 @@
+QUICK DEPLOYMENT GUIDE - GitHub Pages
+======================================
+
+What you'll get: https://yourusername.github.io/sports-signup/
+
+STEPS:
+
+1. CREATE REPOSITORY
+   - Go to github.com, sign in
+   - Click + (top right) → New repository
+   - Name: sports-signup
+   - Public: Yes
+   - Click "Create repository"
+
+2. UPLOAD FILES
+   - Click "uploading an existing file"
+   - Drag these 3 files into the box:
+     • index.html
+     • football_signup.html
+     • netball_signup.html
+   - Click "Commit changes"
+
+3. ENABLE GITHUB PAGES
+   - Go to Settings → Pages
+   - Source: main branch
+   - Click Save
+   - Wait 2 minutes, refresh
+   - Copy your live URL
+
+4. SHARE
+   Your URLs will be:
+   - Main: https://yourusername.github.io/sports-signup/
+   - Football: https://yourusername.github.io/sports-signup/football_signup.html
+   - Netball: https://yourusername.github.io/sports-signup/netball_signup.html
+
+DONE! Share the link with your team.
+
+Note: Each person gets their own separate signup sheet.
+Data does NOT sync between users.
+Use CSV export to share rosters.

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netball Signup Sheet - 7-a-side</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h2 { font-size: 28px; font-weight: 600; margin: 0 0 8px; }
+    .subtitle { font-size: 16px; color: #666; margin: 0 0 24px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+    input[type="text"] { flex: 1; }
+    input[type="number"] { width: 60px; text-align: center; }
+    input:focus { border-color: #e91e63; }
+    button {
+      padding: 10px 20px;
+      background: #e91e63;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:hover { background: #c2185b; }
+    button:active { transform: scale(0.98); }
+    button.secondary {
+      background: white;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    button.secondary:hover { background: #f5f5f5; }
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .team-card {
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .team-a { background: #fce4ec; }
+    .team-b { background: #e1f5fe; }
+    .team-c { background: #f3e5f5; }
+    .team-d { background: #fff3e0; }
+    .team-name {
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+    .team-count {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .player-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .remove-btn {
+      padding: 2px 10px;
+      font-size: 16px;
+      background: transparent;
+      color: #999;
+      border: 1px solid #ddd;
+    }
+    .remove-btn:hover {
+      background: #fee;
+      border-color: #fcc;
+      color: #c00;
+    }
+    .playoff-section {
+      border-top: 2px solid #ddd;
+      padding-top: 24px;
+      margin-top: 24px;
+    }
+    .playoff-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .bracket-card {
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .bracket-title {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    .matches {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .match {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .match-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .match-team {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    .export-row {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .empty-state {
+      font-size: 13px;
+      color: #999;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h2>Netball signup sheet</h2>
+  <p class="subtitle">7-a-side teams</p>
+
+  <div class="card">
+    <div class="input-row">
+      <input type="text" id="playerName" placeholder="Player name" />
+      <button onclick="addPlayer()">Add player</button>
+    </div>
+  </div>
+
+  <div id="teamsContainer" class="teams-grid"></div>
+
+  <div id="playoffSection" style="display: none;" class="playoff-section">
+    <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 20px;">Playoff brackets</h3>
+    <div id="playoffBrackets"></div>
+  </div>
+
+  <div class="export-row">
+    <button class="secondary" onclick="exportData()">Download data (CSV)</button>
+    <button class="secondary" onclick="clearAll()">Clear all</button>
+  </div>
+
+  <script>
+    let players = [];
+    let teams = [
+      { name: 'Team A', players: [], cssClass: 'team-a' },
+      { name: 'Team B', players: [], cssClass: 'team-b' }
+    ];
+    let matchResults = {};
+
+    function addPlayer() {
+      const input = document.getElementById('playerName');
+      const name = input.value.trim();
+      
+      if (!name) return;
+      
+      players.push(name);
+      allocateTeams();
+      input.value = '';
+      input.focus();
+      render();
+      saveToLocalStorage();
+    }
+
+    function removePlayer(playerName) {
+      players = players.filter(p => p !== playerName);
+      allocateTeams();
+      render();
+      saveToLocalStorage();
+    }
+
+    function allocateTeams() {
+      const numTeams = Math.min(Math.ceil(players.length / 7), 4);
+      
+      while (teams.length < numTeams) {
+        const classes = ['team-a', 'team-b', 'team-c', 'team-d'];
+        const names = ['Team A', 'Team B', 'Team C', 'Team D'];
+        teams.push({ 
+          name: names[teams.length], 
+          players: [], 
+          cssClass: classes[teams.length] 
+        });
+      }
+      
+      while (teams.length > numTeams && teams.length > 2) {
+        teams.pop();
+      }
+      
+      teams.forEach(t => t.players = []);
+      
+      const shuffled = [...players].sort(() => Math.random() - 0.5);
+      shuffled.forEach((player, i) => {
+        teams[i % teams.length].players.push(player);
+      });
+    }
+
+    function render() {
+      const container = document.getElementById('teamsContainer');
+      container.innerHTML = teams.map((team) => `
+        <div class="team-card ${team.cssClass}">
+          <div class="team-name">${team.name}</div>
+          <div class="team-count">${team.players.length} of 7 players</div>
+          ${team.players.length > 0 ? `
+            <div class="player-list">
+              ${team.players.map(p => `
+                <div class="player-item">
+                  <span>${p}</span>
+                  <button class="remove-btn" onclick="removePlayer('${p.replace(/'/g, "\\'")}')">×</button>
+                </div>
+              `).join('')}
+            </div>
+          ` : '<div class="empty-state">No players yet</div>'}
+        </div>
+      `).join('');
+      
+      const activeTeams = teams.filter(t => t.players.length > 0);
+      if (activeTeams.length >= 2) {
+        document.getElementById('playoffSection').style.display = 'block';
+        renderPlayoffs();
+      } else {
+        document.getElementById('playoffSection').style.display = 'none';
+      }
+    }
+
+    function renderPlayoffs() {
+      const activeTeams = teams.filter(t => t.players.length > 0);
+      const numTeams = activeTeams.length;
+      const container = document.getElementById('playoffBrackets');
+      
+      if (numTeams === 2) {
+        container.innerHTML = `
+          <div class="bracket-card">
+            <div class="bracket-title">Best of three series</div>
+            <div class="matches">
+              ${generateMatch(activeTeams[0].name, activeTeams[1].name, 'Game 1', 'g1')}
+              ${generateMatch(activeTeams[0].name, activeTeams[1].name, 'Game 2', 'g2')}
+              ${generateMatch(activeTeams[0].name, activeTeams[1].name, 'Game 3', 'g3')}
+            </div>
+          </div>
+        `;
+      } else if (numTeams === 3) {
+        container.innerHTML = `
+          <div class="bracket-card">
+            <div class="bracket-title">Round robin</div>
+            <div class="matches">
+              ${generateMatch(activeTeams[0].name, activeTeams[1].name, 'Match 1', 'm1')}
+              ${generateMatch(activeTeams[0].name, activeTeams[2].name, 'Match 2', 'm2')}
+              ${generateMatch(activeTeams[1].name, activeTeams[2].name, 'Match 3', 'm3')}
+            </div>
+          </div>
+        `;
+      } else if (numTeams === 4) {
+        container.innerHTML = `
+          <div class="playoff-grid">
+            <div class="bracket-card">
+              <div class="bracket-title">Semi-finals</div>
+              <div class="matches">
+                ${generateMatch(activeTeams[0].name, activeTeams[3].name, 'Semi-final 1', 'sf1')}
+                ${generateMatch(activeTeams[1].name, activeTeams[2].name, 'Semi-final 2', 'sf2')}
+              </div>
+            </div>
+            <div class="bracket-card">
+              <div class="bracket-title">Final</div>
+              ${generateMatch('Winner SF1', 'Winner SF2', 'Final', 'final')}
+            </div>
+          </div>
+        `;
+      }
+      
+      restoreMatchResults();
+    }
+
+    function generateMatch(team1, team2, label, id) {
+      return `
+        <div class="match">
+          <div class="match-label">${label}</div>
+          <div class="match-team">
+            <span>${team1}</span>
+            <input type="number" min="0" placeholder="0" data-match="${id}" data-team="1" onchange="saveMatchResult()" />
+          </div>
+          <div class="match-team">
+            <span>${team2}</span>
+            <input type="number" min="0" placeholder="0" data-match="${id}" data-team="2" onchange="saveMatchResult()" />
+          </div>
+        </div>
+      `;
+    }
+
+    function saveMatchResult() {
+      const inputs = document.querySelectorAll('input[data-match]');
+      matchResults = {};
+      inputs.forEach(input => {
+        const matchId = input.dataset.match;
+        const team = input.dataset.team;
+        if (!matchResults[matchId]) matchResults[matchId] = {};
+        matchResults[matchId][team] = input.value;
+      });
+      saveToLocalStorage();
+    }
+
+    function restoreMatchResults() {
+      Object.keys(matchResults).forEach(matchId => {
+        Object.keys(matchResults[matchId]).forEach(team => {
+          const input = document.querySelector(`input[data-match="${matchId}"][data-team="${team}"]`);
+          if (input) input.value = matchResults[matchId][team];
+        });
+      });
+    }
+
+    function exportData() {
+      const activeTeams = teams.filter(t => t.players.length > 0);
+      let csv = 'Team,Player\n';
+      
+      activeTeams.forEach(team => {
+        team.players.forEach(player => {
+          csv += `"${team.name}","${player}"\n`;
+        });
+      });
+      
+      csv += '\n\nMatch Results\n';
+      csv += 'Match,Team 1 Score,Team 2 Score\n';
+      Object.keys(matchResults).forEach(matchId => {
+        const scores = matchResults[matchId];
+        csv += `"${matchId}","${scores['1'] || ''}","${scores['2'] || ''}"\n`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `netball_signup_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAll() {
+      if (confirm('Clear all players and match results?')) {
+        players = [];
+        matchResults = {};
+        teams = [
+          { name: 'Team A', players: [], cssClass: 'team-a' },
+          { name: 'Team B', players: [], cssClass: 'team-b' }
+        ];
+        render();
+        saveToLocalStorage();
+      }
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('netball_players', JSON.stringify(players));
+      localStorage.setItem('netball_matches', JSON.stringify(matchResults));
+    }
+
+    function loadFromLocalStorage() {
+      const savedPlayers = localStorage.getItem('netball_players');
+      const savedMatches = localStorage.getItem('netball_matches');
+      if (savedPlayers) {
+        players = JSON.parse(savedPlayers);
+        allocateTeams();
+      }
+      if (savedMatches) {
+        matchResults = JSON.parse(savedMatches);
+      }
+      render();
+    }
+
+    document.getElementById('playerName').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addPlayer();
+    });
+
+    loadFromLocalStorage();
+  </script>
+</body>
+</html>
